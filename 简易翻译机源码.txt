@@ -1,0 +1,340 @@
+#include <iostream>
+#include <fstream>
+#include <map>
+#include <string>
+#include <sstream>
+#include <vector>
+
+typedef int long long;
+using namespace std;
+
+int gcd(int a, int b) {
+	// 确保a和b都是非负数
+	a = abs(a);
+	b = abs(b);
+	return b == 0 ? a : gcd(b, a % b);
+}
+
+int lcm(int a, int b) {
+	if (a == 0 || b == 0) {
+		return 0; 
+	}
+	
+	return abs(a) / gcd(a, b) * abs(b);
+}
+
+//计算星期几
+int CalculateDay(int a, int b, int c)
+{
+	int total = 0;
+	for (int i = 1; i < a; i++)
+	{
+		if (i % 4 == 0 && i % 100 != 0)
+		{
+			total += 366;
+		}
+		else if (i % 4 == 0 && i % 400 == 0)
+		{
+			total += 366;
+		}
+		else total += 365;
+	}
+	for (int i = 1; i < b; i++)
+	{
+		if (i == 1 || i == 3 || i == 5 || i == 7 || i == 8 || i == 10 || i == 12)
+		{
+			total += 31;
+		}
+		else if (i == 4 || i == 6 || i == 11 || i == 9)
+		{
+			total += 30;
+		}
+		else total += 28;
+	}
+	if (a % 4 == 0 && a % 100 != 0) total += 1;
+	else if (a % 4 == 0 && a % 400 == 0) total += 1;
+	total += c;
+	int t = total % 7;
+	return t;
+}
+
+//阶乘
+int jc(int n) {
+	if (n < 0) return -1; // 阶乘定义域为非负整数
+	long long result = 1;
+	for (int i = 1; i <= n; ++i) {
+		result *= i;
+	}
+	return result;
+}
+
+//组合数
+int zhs(int n, int k)
+{
+	if (k > n) return 0; // k不能大于n
+	if (k == 0 || k == n) return 1;
+
+	int result = 1;
+	// 计算C(n, k) = n! / (k! * (n-k)!)，可以优化为连乘的形式
+	for (int i = 1; i <= k; ++i) {
+		result *= (n - k + i);
+		result /= i; // 分步除以i，防止溢出
+	}
+	return result;
+}
+
+
+//计算员工周工资
+int CalculateWages(int a, int b)
+{
+	if (a <= 0 || a > 168) return 0;
+	else if (a > 40 && a <= 60)
+	{
+		return 40 * b + (a - 40) * b * 1.5;
+	}
+	else if (a > 60)
+	{
+		return 40 * b + 20 * b * 1.5 + (a - 60) * b * 3;
+	}
+	else return a * b;
+}
+
+//链表
+struct Node {
+	int data;          // 数据域，这里假设存储整数
+	Node* next = nullptr; // 指针域，指向下一个节点
+};
+
+
+class LinkedList {
+public:
+	Node* head = nullptr;
+
+	// 添加数据到链表末尾的函数
+	void append(int data) {
+		Node* newNode = new Node();
+		newNode->data = data;
+		newNode->next = nullptr;
+
+		if (head == nullptr) {
+			head = newNode;
+		}
+		else {
+			Node* temp = head;
+			while (temp->next != nullptr) {
+				temp = temp->next;
+			}
+			temp->next = newNode;
+		}
+	}
+
+	// 遍历并打印链表中所有节点的值
+	void printList() {
+		Node* currentNode = head; // 初始化当前节点指针为头节点
+		ofstream ofs("output.txt");
+		// 遍历链表
+		while (currentNode != nullptr) {
+			ofs << currentNode->data << " "; // 打印当前节点的数据
+			currentNode = currentNode->next;       // 移动到下一个节点
+		}
+	}
+
+	//打印
+	void printList1() {
+		Node* currentNode = head; // 初始化当前节点指针为头节点
+		
+		// 遍历链表
+		while (currentNode != nullptr) {
+			cout << currentNode->data << " "; // 打印当前节点的数据
+			currentNode = currentNode->next;       // 移动到下一个节点
+		}
+		cout << endl;
+	}
+
+	// 在LinkedList类中添加排序函数
+	void sortList() {
+		if (head == nullptr || head->next == nullptr) return; // 链表为空或只有一个节点，无需排序
+
+		Node* sortedList = nullptr; // 创建一个新的链表用于存放排序后的节点
+		Node* current = head;
+		Node* nextNode;
+
+		while (current != nullptr) {
+			nextNode = current->next; // 保存下一个节点
+
+			// 将current插入到sortedList的正确位置
+			if (sortedList == nullptr || current->data <= sortedList->data) {
+				current->next = sortedList;
+				sortedList = current;
+			}
+			else {
+				Node* temp = sortedList;
+				while (temp->next != nullptr && temp->next->data < current->data) {
+					temp = temp->next;
+				}
+				current->next = temp->next;
+				temp->next = current;
+			}
+
+			current = nextNode; // 移动到下一个节点
+		}
+
+		head = sortedList; // 将排序后的链表设置为新的head
+	}
+};
+
+int tra(string s, const map<string, string>& dictionary) {
+	auto a = dictionary.find(s);
+
+	int b;
+	try {
+		if (a != dictionary.end()) {
+			//b = stoi(a->second);
+			istringstream iss(a->second);
+			iss >> b;
+		}
+		else {
+			//b = stoi(s);
+			istringstream iss(s);
+			iss >> b;
+		}
+	}
+	catch (const std::invalid_argument& e) {
+		// 处理无效参数异常，例如打印错误信息并返回一个默认值或继续处理
+		cerr << "Error converting to int: " << e.what() << ", for string: " << s << endl;
+		// 这里可以根据实际情况返回一个默认值，例如0，或者让函数抛出异常让调用者处理
+		return 0; // 示例中返回0作为默认值
+	}
+
+	return b;
+}
+
+int main() {
+    map<string, string> dictionary;
+    ifstream ifs1("dict1.txt", ios::in);
+    // 读取字典文件并存储到map中
+    string key, value;
+    while (ifs1 >> key >> value) {
+        dictionary[key] = value;
+    }
+    ifs1.close();
+
+    ifstream ifs2("input1.txt", ios::in);
+    LinkedList list;
+
+    string s1;
+    while (ifs2 >> s1) 
+	{       
+            auto s2 = dictionary.find(s1);
+            // 确保查找到键值对
+            if (s2 != dictionary.end()) 
+			{
+                // 正确地使用迭代器的second成员访问值
+                list.append(stoi(s2->second)); // 应该是s2->second，不是s2
+            } 
+			else
+			{
+				//类型(6)
+				if (s1.find('(') != string::npos && s1.find(',') == string::npos && s1.find('/') == string::npos)
+				{
+					string s = s1.substr(s1.find('(') + 1, s1.length() - 2);
+					int a = tra(s, dictionary);
+					list.append(jc(a));
+					continue;
+				}
+
+				//类型(5,b)
+				else if (s1.find('(') != string::npos && s1.find(',') != string::npos)
+				{
+					size_t start1 = s1.find('(') + 1; // 找到 '(' 后的第一个字符的索引
+					size_t end1 = s1.find(','); // 找到 ',' 的索引
+					size_t start2 = s1.find(',') + 1; // 找到 ',' 后的第一个字符的索引
+					size_t end2 = s1.find(')'); // 找到 ')' 的索引
+
+					string s3 = s1.substr(start1, end1 - start1); // 提取从 '(' 后到 ',' 之前的子串
+					string s4 = s1.substr(start2, end2 - start2); // 提取从 ',' 后到 ')' 之前的子串
+					int a1 = tra(s3,dictionary);
+					int a2 = tra(s4,dictionary);
+					list.append(zhs(a1, a2));
+				}
+
+				//类型{44,16}
+				else if (s1.find('{')!=string::npos)
+				{
+					size_t start1 = s1.find('{') + 1; 
+					size_t end1 = s1.find(','); 
+					size_t start2 = s1.find(',') + 1; 
+					size_t end2 = s1.find('}'); 
+
+					string s3 = s1.substr(start1, end1 - start1); 
+					string s4 = s1.substr(start2, end2 - start2); 
+					int a = tra(s3, dictionary);
+					int b = tra(s4, dictionary);
+					list.append(gcd(a, b));
+					continue;
+				}
+
+				//类型<b,100>
+				else if (s1.find('<') != string::npos)
+				{
+					size_t start1 = s1.find('<') + 1;
+					size_t end1 = s1.find(',');
+					size_t start2 = s1.find(',') + 1;
+					size_t end2 = s1.find('>');
+
+					string s3 = s1.substr(start1, end1 - start1);
+					string s4 = s1.substr(start2, end2 - start2);
+					int a = tra(s3, dictionary);
+					int b = tra(s4, dictionary);
+					list.append(CalculateWages(a, b));
+					continue;
+				}
+
+				//类型(c/a/2)
+				else if (s1.find('(') != string::npos && s1.find('/') != string::npos)
+				{
+					size_t start1 = s1.find('(') + 1;
+					size_t end1 = s1.find('/'); // 修改这里，找到第一个'/'的索引
+					size_t start2 = end1 + 1; // 新的子串起始于第一个'/'之后
+					size_t end2 = s1.find('/', end1 + 1); // 找到第二个'/'的索引
+					size_t start3 = end2 + 1; // 第三个子串起始于第二个'/'之后
+					size_t end3 = s1.find(')');
+
+					string s3 = s1.substr(start1, end1 - start1);
+					string s4 = s1.substr(start2, end2 - start2);
+					string s5 = s1.substr(start3, end3 - start3);
+					int a = tra(s3, dictionary);
+					int b = tra(s4, dictionary);
+					int c = tra(s5, dictionary);
+					list.append(CalculateDay(a, b, c));
+					continue;
+				}
+				//类型[b,10]
+				else if (s1.find('[') != string::npos)
+				{
+					size_t start1 = s1.find('[') + 1;
+					size_t end1 = s1.find(',');
+					size_t start2 = s1.find(',') + 1;
+					size_t end2 = s1.find(']');
+
+					string s3 = s1.substr(start1, end1 - start1);
+					string s4 = s1.substr(start2, end2 - start2);
+					int a = tra(s3, dictionary);
+					int b = tra(s4, dictionary);
+					list.append(lcm(a, b));
+					continue;
+				}
+				
+				//类型 3 1000 99
+				else
+				{
+					list.append(stoi(s1));
+				}
+			}
+    }
+	list.sortList();
+	list.printList();
+	list.printList1();
+	
+    return 0;
+}
